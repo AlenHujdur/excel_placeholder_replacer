@@ -21,15 +21,18 @@ class DocumentsController < ApplicationController
     @rendered_document = DocProcessor.new(@document).render_document
 
     if @document.processed_document_path.present? && (@document.processed_document_path.include?('.xlsx') || @document.processed_document_path.include?('.xls'))
-      path = Rails.root.join('public', @document.processed_document_path)
-      puts "Resolved Path: #{path}"
+      # Correctly construct the full path to the processed document
+      processed_document_path = @document.processed_document_path.gsub(%r{\A/+}, '') # Remove leading slash if present
+      full_path = Rails.root.join('public', processed_document_path)
 
-      if File.exist?(path)
-        puts "File exists at path: #{path}"
-        @html_table = excel_to_html(path)
+      puts "Opening processed document at path: #{full_path}"
+
+      if File.exist?(full_path)
+        puts "File exists at path: #{full_path}"
+        @html_table = excel_to_html(full_path)
       else
-        puts "File does not exist at path: #{path}"
-        @html_table = "<p>File does not exist at path: #{path}</p>"
+        puts "File does not exist at path: #{full_path}"
+        @html_table = "<p>File does not exist at path: #{full_path}</p>"
       end
     else
       @html_table = "<p>Invalid or missing document path.</p>"
@@ -55,7 +58,6 @@ class DocumentsController < ApplicationController
 
     html
   end
-
 
   private
 
