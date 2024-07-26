@@ -1,0 +1,23 @@
+<p>
+  <strong>Original File:</strong>
+  <%= link_to @document.document.identifier, @document.document.url %>
+</p>
+
+<p>
+  <h1>Document Details</h1>
+  <strong>Processed Content:</strong>
+<p>
+  <strong>Title:</strong>
+  <%= @document.document %>
+</p>
+
+<div>
+  <%= raw @html_table %>
+</div>
+</p>
+
+<p>
+  <strong>Download Processed File:</strong>
+  <%= link_to 'Download Processed File', @document.processed_document_path if @document.processed_document_path.present? %>
+</p>
+

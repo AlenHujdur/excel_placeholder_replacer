@@ -1,0 +1,5 @@
+<% @documents.each do |document| %>
+  <%= link_to document.document, document_path(document) %> <br>
+<% end %>
+
+<%= link_to 'New Document', new_document_path %>

@@ -1,0 +1,21 @@
+{
+    "sqltools.connections": [
+        {
+            "name": "MariaDB",
+            "server": "localhost",
+            "driver": "MariaDB",
+            "port": 3306,
+            "username": "sigura",
+            "askForPassword": false,
+            "password": "pass",
+            "database": "sigura_base",
+            "connectionTimeout": 15
+        },
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "sqlite",
+            "database": "${workspaceFolder:document_processor}/storage/development.sqlite3"
+        }
+    ]
+}
