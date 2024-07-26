@@ -107,15 +107,15 @@ class DocumentsController < ApplicationController
     wrap_text = cell.change_text_wrap(true)
 
     # Check border lines
-    top_border_line = cell.get_border(:top).to_s != 'none'
-    left_border_line = cell.get_border(:left).to_s != 'none'
-    right_border_line = cell.get_border(:right).to_s != 'none'
-    bottom_border_line = cell.get_border(:bottom).to_s != 'none'
+    top_border_line = cell.get_border(:top).to_s != ''
+    left_border_line = cell.get_border(:left).to_s != ''
+    right_border_line = cell.get_border(:right).to_s != ''
+    bottom_border_line = cell.get_border(:bottom).to_s != ''
 
-    top_border_style = cell.get_border(:top) == 'thin' ? '1px solid black' : '2px solid black'
-    left_border_style = cell.get_border(:left) == 'thin' ? '1px solid black' : '2px solid black'
-    right_border_style = cell.get_border(:right) == 'thin' ? '1px solid black' : '2px solid black'
-    bottom_border_style = cell.get_border(:bottom) == 'thin' ? '1px solid black' : '2px solid black'
+    top_border_style = cell.get_border(:top) == 'thin' ? '1px solid black' : ''
+    left_border_style = cell.get_border(:left) == 'thin' ? '1px solid black' : ''
+    right_border_style = cell.get_border(:right) == 'thin' ? '1px solid black' : ''
+    bottom_border_style = cell.get_border(:bottom) == 'thin' ? '1px solid black' : ''
 
     styles << "border-top: #{top_border_style};" if top_border_line
     styles << "border-left: #{left_border_style};" if left_border_line
@@ -134,7 +134,6 @@ class DocumentsController < ApplicationController
 
     styles.any? ? " style=\"#{styles.join(' ')}\"" : ""
   end
-
 
   def document_params
     params.require(:document).permit(:document)
