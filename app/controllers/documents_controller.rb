@@ -1,4 +1,11 @@
 class DocumentsController < ApplicationController
+  require 'rubyXL'
+  require 'rubyXL/convenience_methods/cell'
+  require 'rubyXL/convenience_methods/color'
+  require 'rubyXL/convenience_methods/font'
+  require 'rubyXL/convenience_methods/workbook'
+  require 'rubyXL/convenience_methods/worksheet'
+
   def index
     @documents = Document.all
   end
@@ -21,25 +28,22 @@ class DocumentsController < ApplicationController
     @rendered_document = DocProcessor.new(@document).render_document
 
     if @document.processed_document_path.present? && (@document.processed_document_path.include?('.xlsx') || @document.processed_document_path.include?('.xls'))
-      # Correctly construct the full path to the processed document
-      processed_document_path = @document.processed_document_path.gsub(%r{\A/+}, '') # Remove leading slash if present
-      full_path = Rails.root.join('public', processed_document_path)
+      path = Rails.root.join('public', @document.processed_document_path.gsub(%r{\A/+}, ''))
+      puts "Opening processed document at path: #{path}"
 
-      puts "Opening processed document at path: #{full_path}"
-
-      if File.exist?(full_path)
-        puts "File exists at path: #{full_path}"
-        @html_table = excel_to_html(full_path)
+      if File.exist?(path)
+        puts "File exists at path: #{path}"
+        @html_table = excel_to_html_with_styles(path)
       else
-        puts "File does not exist at path: #{full_path}"
-        @html_table = "<p>File does not exist at path: #{full_path}</p>"
+        puts "File does not exist at path: #{path}"
+        @html_table = "<p>File does not exist at path: #{path}</p>"
       end
     else
       @html_table = "<p>Invalid or missing document path.</p>"
     end
   end
 
-  def excel_to_html(file_path)
+  def excel_to_html_with_styles(file_path)
     workbook = RubyXL::Parser.parse(file_path)
     html = ""
 
@@ -49,7 +53,7 @@ class DocumentsController < ApplicationController
       worksheet.each do |row|
         html << "<tr>"
         row && row.cells.each do |cell|
-          html << "<td>#{cell && cell.value}</td>"
+          html << "<td#{style_to_html(cell)}>#{cell && cell.value}</td>"
         end
         html << "</tr>"
       end
@@ -57,6 +61,31 @@ class DocumentsController < ApplicationController
     end
 
     html
+  end
+
+  def style_to_html(cell)
+    return "" unless cell
+
+    styles = []
+    font_name = cell.font_name
+    font_size = cell.font_size
+    font_color = cell.font_color
+    fill_color = cell.fill_color
+    bold = cell.is_bolded
+    italic = cell.is_italicized
+    h_align = cell.horizontal_alignment
+    v_align = cell.vertical_alignment
+
+    styles << "font-family:#{font_name};" if font_name
+    styles << "font-size:#{font_size}px;" if font_size
+    styles << "color:##{font_color};" if font_color
+    styles << "background-color:##{fill_color};" if fill_color
+    styles << "font-weight:bold;" if bold
+    styles << "font-style:italic;" if italic
+    styles << "text-align:#{h_align};" if h_align
+    styles << "vertical-align:#{v_align};" if v_align
+
+    styles.any? ? " style=\"#{styles.join(' ')}\"" : ""
   end
 
   private
