@@ -50,13 +50,13 @@ class DocumentsController < ApplicationController
     html = ""
 
     workbook.worksheets.each do |worksheet|
-      merges = prepare_merge_ranges(worksheet) # Function to handle merged cells
+      merges = prepare_merge_ranges(worksheet)
       html << "<h2>#{worksheet.sheet_name}</h2>"
       html << "<table border='1'>"
       worksheet.each_with_index do |row, row_idx|
         html << "<tr>"
         row && row.cells.each_with_index do |cell, col_idx|
-          next if merges[[row_idx, col_idx]] == :skip # Skip cells that are merged
+          next if merges[[row_idx, col_idx]] == :skip
           html << "<td#{style_to_html(cell)}#{merge_html(merges, row_idx, col_idx)}>"
           html << "#{cell && cell.value}</td>"
         end
@@ -106,6 +106,22 @@ class DocumentsController < ApplicationController
     v_align = cell.vertical_alignment
     wrap_text = cell.change_text_wrap(true)
 
+    # Check border lines
+    top_border_line = cell.get_border(:top).to_s != 'none'
+    left_border_line = cell.get_border(:left).to_s != 'none'
+    right_border_line = cell.get_border(:right).to_s != 'none'
+    bottom_border_line = cell.get_border(:bottom).to_s != 'none'
+
+    top_border_style = cell.get_border(:top) == 'thin' ? '1px solid black' : '2px solid black'
+    left_border_style = cell.get_border(:left) == 'thin' ? '1px solid black' : '2px solid black'
+    right_border_style = cell.get_border(:right) == 'thin' ? '1px solid black' : '2px solid black'
+    bottom_border_style = cell.get_border(:bottom) == 'thin' ? '1px solid black' : '2px solid black'
+
+    styles << "border-top: #{top_border_style};" if top_border_line
+    styles << "border-left: #{left_border_style};" if left_border_line
+    styles << "border-right: #{right_border_style};" if right_border_line
+    styles << "border-bottom: #{bottom_border_style};" if bottom_border_line
+
     styles << "font-family:#{font_name};" if font_name
     styles << "font-size:#{font_size}px;" if font_size
     styles << "color:##{font_color};" if font_color
@@ -118,6 +134,7 @@ class DocumentsController < ApplicationController
 
     styles.any? ? " style=\"#{styles.join(' ')}\"" : ""
   end
+
 
   def document_params
     params.require(:document).permit(:document)

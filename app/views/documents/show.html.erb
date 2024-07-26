@@ -1,6 +1,8 @@
 <p>
   <strong>Original File:</strong>
-  <%= link_to @document.document.identifier, @document.document.url %>
+  <%= link_to @document.document.identifier, @document.document.url %> <br>
+  <strong>Download Processed File:</strong>
+  <%= link_to 'Download Processed File', @document.processed_document_path if @document.processed_document_path.present? %>
 </p>
 
 <p>
@@ -11,13 +13,45 @@
   <%= @document.document %>
 </p>
 
-<div>
+<div id="excel">
   <%= raw @html_table %>
 </div>
 </p>
 
 <p>
-  <strong>Download Processed File:</strong>
-  <%= link_to 'Download Processed File', @document.processed_document_path if @document.processed_document_path.present? %>
+
 </p>
+
+<style>
+  #excel {
+    size: A4;
+    margin: 2cm;
+  }
+
+  #excel>table {
+    width: 21cm;
+    height: 29.7cm;
+    margin: 2cm;
+    border: 1px solid #000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td {
+    border: 1px solid #000;
+    padding: 5px;
+  }
+
+  th {
+    border: 1px solid #000;
+    padding: 5px;
+    background-color: #f2f2f2;
+  }
+
+</style>
 
