@@ -43,17 +43,22 @@ class DocumentsController < ApplicationController
     end
   end
 
+  private
+
   def excel_to_html_with_styles(file_path)
     workbook = RubyXL::Parser.parse(file_path)
     html = ""
 
     workbook.worksheets.each do |worksheet|
+      merges = prepare_merge_ranges(worksheet) # Function to handle merged cells
       html << "<h2>#{worksheet.sheet_name}</h2>"
       html << "<table border='1'>"
-      worksheet.each do |row|
+      worksheet.each_with_index do |row, row_idx|
         html << "<tr>"
-        row && row.cells.each do |cell|
-          html << "<td#{style_to_html(cell)}>#{cell && cell.value}</td>"
+        row && row.cells.each_with_index do |cell, col_idx|
+          next if merges[[row_idx, col_idx]] == :skip # Skip cells that are merged
+          html << "<td#{style_to_html(cell)}#{merge_html(merges, row_idx, col_idx)}>"
+          html << "#{cell && cell.value}</td>"
         end
         html << "</tr>"
       end
@@ -61,6 +66,30 @@ class DocumentsController < ApplicationController
     end
 
     html
+  end
+
+  def merge_html(merges, row, col)
+    merge = merges[[row, col]]
+    return "" unless merge
+    " colspan='#{merge[:colspan]}' rowspan='#{merge[:rowspan]}'"
+  end
+
+  def prepare_merge_ranges(worksheet)
+    merges = {}
+    worksheet.merged_cells.each do |range|
+      puts "Merged range: #{range.inspect}"
+      row_range = range.ref.row_range
+      col_range = range.ref.col_range
+
+      (row_range.first..row_range.last).each do |row|
+        (col_range.first..col_range.last).each do |col|
+          merges[[row, col]] = :skip
+        end
+      end
+
+      merges[[row_range.first, col_range.first]] = { colspan: col_range.size, rowspan: row_range.size }
+    end
+    merges
   end
 
   def style_to_html(cell)
@@ -75,6 +104,7 @@ class DocumentsController < ApplicationController
     italic = cell.is_italicized
     h_align = cell.horizontal_alignment
     v_align = cell.vertical_alignment
+    wrap_text = cell.change_text_wrap(true)
 
     styles << "font-family:#{font_name};" if font_name
     styles << "font-size:#{font_size}px;" if font_size
@@ -84,11 +114,10 @@ class DocumentsController < ApplicationController
     styles << "font-style:italic;" if italic
     styles << "text-align:#{h_align};" if h_align
     styles << "vertical-align:#{v_align};" if v_align
+    styles << "white-space: normal; word-wrap: break-word;" if wrap_text
 
     styles.any? ? " style=\"#{styles.join(' ')}\"" : ""
   end
-
-  private
 
   def document_params
     params.require(:document).permit(:document)
