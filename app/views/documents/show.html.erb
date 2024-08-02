@@ -4,6 +4,23 @@
   <strong>Download Processed File:</strong>
   <%= link_to 'Download Processed File', @document.processed_document_path if @document.processed_document_path.present? %>
 </p>
+<p>
+  <h1>Document original Details</h1>
+  <strong>Original Content:</strong>
+<p>
+
+<p>
+  <strong>Title:</strong>
+  <%= @document.document %>
+</p>
+
+<p>
+  <strong>Content:</strong>
+  <div id="excel">
+  <%= raw @html_table_original %>
+  </div>
+</p>
+
 
 <p>
   <h1>Document Details</h1>

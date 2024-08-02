@@ -10,10 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_25_100804) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_02_093935) do
   create_table "documents", force: :cascade do |t|
     t.string "document"
     t.string "processed_document_path"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "placeholders", force: :cascade do |t|
+    t.string "key"
+    t.string "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

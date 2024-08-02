@@ -1,0 +1,28 @@
+<h1><%= @placeholder.new_record? ? 'New Placeholder' : 'Edit Placeholder' %></h1>
+
+<%= form_with(model: @placeholder) do |form| %>
+  <p>
+    <span>
+      <%= form.label :key %>
+      <%= form.text_area :key, size: "20x1", class: "resizable-input" %>
+    </span>
+    =>
+    <span>
+      <%= form.label :value %>
+      <%= form.text_area :value, size: "20x1", class: "resizable-input" %>
+    </span>
+  </p>
+  <p>
+    <%= form.submit %>
+  </p>
+<% end %>
+<%= link_to 'Back', placeholders_path %>
+
+<style>
+  .resizable-input {
+    resize: both; /* Allows resizing both horizontally and vertically */
+    overflow: auto; /* Adds scrollbar when needed */
+    width: auto;
+    min-width: 150px; /* Minimum width for better UX */
+  }
+</style>

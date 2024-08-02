@@ -13,6 +13,12 @@ class DocumentsController < ApplicationController
     @document = Document.new
   end
 
+  def destroy
+    @document = Document.find(params[:id])
+    @document.destroy
+    redirect_to documents_path
+  end
+
   def create
     @document = Document.new(document_params)
     if @document.save
@@ -27,10 +33,17 @@ class DocumentsController < ApplicationController
     @document = Document.find(params[:id])
     @rendered_document = DocProcessor.new(@document).render_document
 
+    original_path = Rails.root.join('public', @document.document_url.gsub(%r{\A/+}, ''))
+
+    if File.exist?(original_path)
+      @html_table_original = original_excel_to_html_with_styles(original_path)
+    else
+      @html_table_original = "<p>File does not exist at path: #{original_path}</p>"
+    end
+
     if @document.processed_document_path.present? && (@document.processed_document_path.include?('.xlsx') || @document.processed_document_path.include?('.xls'))
       path = Rails.root.join('public', @document.processed_document_path.gsub(%r{\A/+}, ''))
       puts "Opening processed document at path: #{path}"
-
       if File.exist?(path)
         puts "File exists at path: #{path}"
         @html_table = excel_to_html_with_styles(path)
@@ -46,6 +59,29 @@ class DocumentsController < ApplicationController
   private
 
   def excel_to_html_with_styles(file_path)
+    workbook = RubyXL::Parser.parse(file_path)
+    html = ""
+
+    workbook.worksheets.each do |worksheet|
+      merges = prepare_merge_ranges(worksheet)
+      html << "<h2>#{worksheet.sheet_name}</h2>"
+      html << "<table border='1'>"
+      worksheet.each_with_index do |row, row_idx|
+        html << "<tr>"
+        row && row.cells.each_with_index do |cell, col_idx|
+          next if merges[[row_idx, col_idx]] == :skip
+          html << "<td#{style_to_html(cell)}#{merge_html(merges, row_idx, col_idx)}>"
+          html << "#{cell && cell.value}</td>"
+        end
+        html << "</tr>"
+      end
+      html << "</table>"
+    end
+
+    html
+  end
+
+  def original_excel_to_html_with_styles(file_path)
     workbook = RubyXL::Parser.parse(file_path)
     html = ""
 

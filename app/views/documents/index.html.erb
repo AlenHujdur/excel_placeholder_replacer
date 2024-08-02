@@ -1,5 +1,9 @@
 <% @documents.each do |document| %>
-  <%= link_to document.document, document_path(document) %> <br>
+  <%= link_to document.document, document_path(document) %> | <%= link_to "Destroy", document_path(document.id), data: {
+                    turbo_method: :delete,
+                    turbo_confirm: "Are you sure?"
+                  } %> <br>
 <% end %>
 
-<%= link_to 'New Document', new_document_path %>
+<%= link_to 'New Document', new_document_path %> <br>
+<%== link_to 'Placeholders', placeholders_path%>
